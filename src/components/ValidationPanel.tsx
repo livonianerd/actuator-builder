@@ -13,7 +13,9 @@ export default function ValidationPanel({ params }: ValidationPanelProps) {
     'Encoder resolution: 32 CPR (counts per revolution)',
     'Maximum continuous current: 10A',
     'Peak torque duration: 1 second',
-    'Estimated gear ratio: 6:1 (quasi-direct-drive)',
+    'Planetary gearbox ratio: 6:1 (quasi-direct-drive)',
+    'Gearbox efficiency: ~95% (single-stage planetary)',
+    'Gear module: 1.0 (20T sun, 24T planets, 60T ring)',
     'Air gap between stator and rotor: 0.5mm',
     'Magnet grade: N42 NdFeB',
     'Winding: 3-phase, delta configuration',
@@ -65,6 +67,33 @@ export default function ValidationPanel({ params }: ValidationPanelProps) {
       type: 'warning',
       title: 'Few Mounting Bolts',
       message: 'Consider using at least 4 bolts for even load distribution and vibration resistance.',
+    })
+  }
+
+  // Gearbox validations
+  const ringGearRadius = params.sunGearRadius + params.planetGearRadius * 2
+  if (ringGearRadius > params.outerDiameter * 0.45) {
+    validations.push({
+      type: 'error',
+      title: 'Gearbox Too Large',
+      message: 'Planetary gearbox does not fit within housing. Reduce sun or planet gear sizes.',
+    })
+  }
+
+  const calculatedRatio = 1 + (params.planetGearRadius * 2) / params.sunGearRadius
+  if (Math.abs(calculatedRatio - 6) > 1) {
+    validations.push({
+      type: 'warning',
+      title: 'Gear Ratio Mismatch',
+      message: `Current gear sizes give ~${calculatedRatio.toFixed(1)}:1 ratio. Adjust for optimal 6:1 ratio.`,
+    })
+  }
+
+  if (params.planetGearRadius < params.sunGearRadius * 1.5) {
+    validations.push({
+      type: 'warning',
+      title: 'Small Planet Gears',
+      message: 'Planet gears should be at least 1.5x sun gear radius for proper load distribution.',
     })
   }
 

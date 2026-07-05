@@ -25,6 +25,36 @@ export default function BOMPanel({ params }: BOMPanelProps) {
       specs: `OD: ${(params.outerDiameter * 0.7).toFixed(1)}mm, ${params.rotorThickness}mm thick`,
     },
     {
+      part: 'Sun Gear',
+      material: 'Hardened Steel',
+      qty: 1,
+      specs: `D: ${params.sunGearRadius * 2}mm, ${params.gearboxThickness}mm thick, 20T`,
+    },
+    {
+      part: 'Planet Gears',
+      material: 'Hardened Steel',
+      qty: params.numPlanets,
+      specs: `D: ${params.planetGearRadius * 2}mm, ${params.gearboxThickness}mm thick, 24T`,
+    },
+    {
+      part: 'Ring Gear',
+      material: 'Hardened Steel',
+      qty: 1,
+      specs: `D: ${(params.sunGearRadius + params.planetGearRadius * 2) * 2}mm, ${params.gearboxThickness}mm thick, 60T`,
+    },
+    {
+      part: 'Planet Carrier',
+      material: 'Aluminum 7075-T6',
+      qty: 1,
+      specs: `D: ${(params.sunGearRadius + params.planetGearRadius * 1.5) * 2}mm, 6:1 ratio`,
+    },
+    {
+      part: 'Planet Pins',
+      material: 'Stainless Steel',
+      qty: params.numPlanets,
+      specs: 'D: 6mm',
+    },
+    {
       part: 'Output Shaft',
       material: 'Stainless Steel 316',
       qty: 1,

@@ -13,16 +13,24 @@ interface ActuatorAssemblyProps {
 
 export default function ActuatorAssembly({ params, exploded, rotating, showLabels }: ActuatorAssemblyProps) {
   const rotorRef = useRef<Group>(null)
+  const sunGearRef = useRef<Group>(null)
+  const planetCarrierRef = useRef<Group>(null)
   const shaftRef = useRef<Group>(null)
   const encoderRef = useRef<Group>(null)
 
   const explosionFactor = exploded ? 1 : 0
+  const gearRatio = 6 // 6:1 reduction
 
   useFrame((_state, delta) => {
-    if (rotating && rotorRef.current && shaftRef.current && encoderRef.current) {
-      rotorRef.current.rotation.y += delta * 2
-      shaftRef.current.rotation.y += delta * 2
-      encoderRef.current.rotation.y += delta * 2
+    if (rotating) {
+      const inputSpeed = delta * 2
+      const outputSpeed = inputSpeed / gearRatio
+
+      if (rotorRef.current) rotorRef.current.rotation.y += inputSpeed
+      if (sunGearRef.current) sunGearRef.current.rotation.y += inputSpeed
+      if (planetCarrierRef.current) planetCarrierRef.current.rotation.y += outputSpeed
+      if (shaftRef.current) shaftRef.current.rotation.y += outputSpeed
+      if (encoderRef.current) encoderRef.current.rotation.y += outputSpeed
     }
   })
 
@@ -37,6 +45,10 @@ export default function ActuatorAssembly({ params, exploded, rotating, showLabel
     encoderDiameter,
     boltCircleDiameter,
     numBolts,
+    gearboxThickness,
+    sunGearRadius,
+    planetGearRadius,
+    numPlanets,
   } = params
 
   const housingRadius = outerDiameter / 2
@@ -129,6 +141,122 @@ export default function ActuatorAssembly({ params, exploded, rotating, showLabel
           )
         })}
         <Label text="Rotor" position={[housingRadius + 20, 0, 0]} />
+      </group>
+
+      {/* Planetary Gearbox */}
+      <group position={[0, -10, explosionFactor * 30]}>
+        {/* Sun Gear */}
+        <group ref={sunGearRef}>
+          <mesh castShadow receiveShadow>
+            <cylinderGeometry args={[sunGearRadius, sunGearRadius, gearboxThickness, 32]} />
+            <meshStandardMaterial color="#FFD700" metalness={0.7} roughness={0.3} />
+          </mesh>
+          {/* Sun gear teeth */}
+          {Array.from({ length: 20 }).map((_, i) => {
+            const angle = (i / 20) * Math.PI * 2
+            return (
+              <mesh
+                key={i}
+                position={[
+                  Math.cos(angle) * (sunGearRadius + 1),
+                  0,
+                  Math.sin(angle) * (sunGearRadius + 1)
+                ]}
+                rotation={[0, angle, 0]}
+                castShadow
+              >
+                <boxGeometry args={[2, gearboxThickness * 0.9, 1.5]} />
+                <meshStandardMaterial color="#DAA520" metalness={0.8} roughness={0.2} />
+              </mesh>
+            )
+          })}
+          <Label text="Sun Gear" position={[sunGearRadius + 10, gearboxThickness / 2 + 5, 0]} />
+        </group>
+
+        {/* Planet Carrier */}
+        <group ref={planetCarrierRef}>
+          {/* Carrier plate */}
+          <mesh castShadow receiveShadow position={[0, gearboxThickness / 2 + 2, 0]}>
+            <cylinderGeometry args={[sunGearRadius + planetGearRadius * 1.5, sunGearRadius + planetGearRadius * 1.5, 3, 32]} />
+            <meshStandardMaterial color="#505050" metalness={0.7} roughness={0.4} />
+          </mesh>
+
+          {/* Planet Gears */}
+          {Array.from({ length: numPlanets }).map((_, i) => {
+            const angle = (i / numPlanets) * Math.PI * 2
+            const orbitRadius = sunGearRadius + planetGearRadius
+            return (
+              <group
+                key={i}
+                position={[
+                  Math.cos(angle) * orbitRadius,
+                  0,
+                  Math.sin(angle) * orbitRadius
+                ]}
+              >
+                {/* Planet gear body */}
+                <mesh castShadow receiveShadow>
+                  <cylinderGeometry args={[planetGearRadius, planetGearRadius, gearboxThickness, 32]} />
+                  <meshStandardMaterial color="#4169E1" metalness={0.7} roughness={0.3} />
+                </mesh>
+                {/* Planet gear teeth */}
+                {Array.from({ length: 24 }).map((_, j) => {
+                  const toothAngle = (j / 24) * Math.PI * 2
+                  return (
+                    <mesh
+                      key={j}
+                      position={[
+                        Math.cos(toothAngle) * (planetGearRadius + 1),
+                        0,
+                        Math.sin(toothAngle) * (planetGearRadius + 1)
+                      ]}
+                      rotation={[0, toothAngle, 0]}
+                      castShadow
+                    >
+                      <boxGeometry args={[2, gearboxThickness * 0.9, 1.5]} />
+                      <meshStandardMaterial color="#1E90FF" metalness={0.8} roughness={0.2} />
+                    </mesh>
+                  )
+                })}
+                {/* Planet pin */}
+                <mesh castShadow>
+                  <cylinderGeometry args={[3, 3, gearboxThickness + 5, 16]} />
+                  <meshStandardMaterial color="#808080" metalness={0.9} roughness={0.2} />
+                </mesh>
+              </group>
+            )
+          })}
+          <Label text="Planet Carrier" position={[sunGearRadius + planetGearRadius * 2 + 15, 0, 0]} />
+        </group>
+
+        {/* Ring Gear (internal teeth) */}
+        <group>
+          <mesh castShadow receiveShadow>
+            <cylinderGeometry args={[sunGearRadius + planetGearRadius * 2, sunGearRadius + planetGearRadius * 2, gearboxThickness, 32, 1, false]} />
+            <meshStandardMaterial color="#8B0000" metalness={0.7} roughness={0.3} side={2} />
+          </mesh>
+          {/* Ring gear internal teeth */}
+          {Array.from({ length: 60 }).map((_, i) => {
+            const angle = (i / 60) * Math.PI * 2
+            const ringRadius = sunGearRadius + planetGearRadius * 2
+            return (
+              <mesh
+                key={i}
+                position={[
+                  Math.cos(angle) * (ringRadius - 1),
+                  0,
+                  Math.sin(angle) * (ringRadius - 1)
+                ]}
+                rotation={[0, angle, 0]}
+                castShadow
+              >
+                <boxGeometry args={[2, gearboxThickness * 0.9, 1.5]} />
+                <meshStandardMaterial color="#A52A2A" metalness={0.8} roughness={0.2} />
+              </mesh>
+            )
+          })}
+          <Label text="Ring Gear" position={[sunGearRadius + planetGearRadius * 2 + 20, -gearboxThickness / 2 - 5, 0]} />
+        </group>
       </group>
 
       {/* Front Bearing */}

@@ -192,6 +192,62 @@ export default function ControlPanel({
           onChange={(e) => updateParam('numBolts', Number(e.target.value))}
         />
       </div>
+
+      <hr style={{ margin: '1.5rem 0', border: 'none', borderTop: '1px solid #3a3a3a' }} />
+
+      <h2>Gearbox (6:1)</h2>
+
+      <div className="control-group">
+        <label>
+          Gearbox Thickness: <span className="control-value">{params.gearboxThickness} mm</span>
+        </label>
+        <input
+          type="range"
+          min="10"
+          max="25"
+          value={params.gearboxThickness}
+          onChange={(e) => updateParam('gearboxThickness', Number(e.target.value))}
+        />
+      </div>
+
+      <div className="control-group">
+        <label>
+          Sun Gear Radius: <span className="control-value">{params.sunGearRadius} mm</span>
+        </label>
+        <input
+          type="range"
+          min="6"
+          max="15"
+          value={params.sunGearRadius}
+          onChange={(e) => updateParam('sunGearRadius', Number(e.target.value))}
+        />
+      </div>
+
+      <div className="control-group">
+        <label>
+          Planet Gear Radius: <span className="control-value">{params.planetGearRadius} mm</span>
+        </label>
+        <input
+          type="range"
+          min="12"
+          max="25"
+          value={params.planetGearRadius}
+          onChange={(e) => updateParam('planetGearRadius', Number(e.target.value))}
+        />
+      </div>
+
+      <div className="control-group">
+        <label>
+          Number of Planets: <span className="control-value">{params.numPlanets}</span>
+        </label>
+        <input
+          type="range"
+          min="3"
+          max="5"
+          value={params.numPlanets}
+          onChange={(e) => updateParam('numPlanets', Number(e.target.value))}
+        />
+      </div>
     </div>
   )
 }

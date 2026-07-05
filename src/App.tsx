@@ -16,6 +16,10 @@ export interface ActuatorParams {
   encoderDiameter: number
   boltCircleDiameter: number
   numBolts: number
+  gearboxThickness: number
+  sunGearRadius: number
+  planetGearRadius: number
+  numPlanets: number
 }
 
 function App() {
@@ -30,6 +34,10 @@ function App() {
     encoderDiameter: 40,
     boltCircleDiameter: 85,
     numBolts: 6,
+    gearboxThickness: 15,
+    sunGearRadius: 10,
+    planetGearRadius: 20,
+    numPlanets: 3,
   })
 
   const [exploded, setExploded] = useState(false)
